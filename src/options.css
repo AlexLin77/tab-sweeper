@@ -1,0 +1,156 @@
+body {
+  background: var(--surface);
+  font-size: 14px;
+}
+
+.page {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 40px 16px 64px;
+}
+
+.page-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.page-head img {
+  border-radius: 9px;
+}
+
+.page-head h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+}
+
+.page-head p {
+  margin: 2px 0 0;
+}
+
+.saved {
+  margin-left: auto;
+  color: var(--ok);
+  font-size: 13px;
+  font-weight: 550;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.saved.show {
+  opacity: 1;
+}
+
+.card {
+  margin-bottom: 16px;
+  padding: 20px 22px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.card h2 {
+  margin: 0 0 14px;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.choice input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+}
+
+.choice strong {
+  display: block;
+  font-weight: 550;
+}
+
+small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.field {
+  margin: 14px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.field > label:not(.choice),
+.field > legend {
+  display: block;
+  margin-bottom: 6px;
+  padding: 0;
+  font-weight: 550;
+}
+
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+input[type="number"],
+select,
+textarea {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+}
+
+input[type="number"] {
+  width: 90px;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  height: auto;
+  padding: 8px 10px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.hint {
+  margin: 14px 0 0;
+  font-size: 13px;
+}
+
+.hint a {
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--text);
+  font: 12px ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}

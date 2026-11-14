@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tab Sweeper settings</title>
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="options.css" />
+    <script type="module" src="options.js"></script>
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-head">
+        <img src="../icons/icon-48.png" width="40" height="40" alt="" />
+        <div>
+          <h1>Tab Sweeper</h1>
+          <p class="muted">Changes save automatically.</p>
+        </div>
+        <span id="saved" class="saved" role="status" aria-live="polite"></span>
+      </header>
+
+      <form id="form" novalidate>
+        <section class="card">
+          <h2>Auto-sweep</h2>
+          <label class="choice">
+            <input type="checkbox" name="enabled" />
+            <span><strong>Automatically sweep idle tabs</strong><small>Tabs are checked once a minute.</small></span>
+          </label>
+
+          <div class="field">
+            <label for="idle-amount">A tab counts as idle after</label>
+            <div class="inline">
+              <input id="idle-amount" name="idleAmount" type="number" min="1" step="1" required />
+              <select name="idleUnit" aria-label="Unit">
+                <option value="1">minutes</option>
+                <option value="60">hours</option>
+                <option value="1440">days</option>
+              </select>
+            </div>
+            <small>Measured from the last time you looked at the tab.</small>
+          </div>
+
+          <fieldset class="field">
+            <legend>What happens to idle tabs</legend>
+            <label class="choice">
+              <input type="radio" name="action" value="close" />
+              <span
+                ><strong>Close them</strong
+                ><small>Closed tabs are listed under “Recently closed” in the popup, so you can reopen them.</small></span
+              >
+            </label>
+            <label class="choice">
+              <input type="radio" name="action" value="discard" />
+              <span
+                ><strong>Put them to sleep</strong
+                ><small>The tab stays in your tab strip but its memory is freed. It reloads when you click it.</small></span
+              >
+            </label>
+          </fieldset>
+
+          <div class="field">
+            <label for="min-tabs">Always leave at least</label>
+            <div class="inline">
+              <input id="min-tabs" name="minTabsPerWindow" type="number" min="0" max="100" step="1" />
+              <span>tabs open in each window</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Never sweep</h2>
+          <label class="choice">
+            <input type="checkbox" name="protectPinned" />
+            <span><strong>Pinned tabs</strong></span>
+          </label>
+          <label class="choice">
+            <input type="checkbox" name="protectAudible" />
+            <span
+              ><strong>Tabs playing audio</strong><small>The clock starts again when the audio stops.</small></span
+            >
+          </label>
+          <label class="choice">
+            <input type="checkbox" name="protectGrouped" />
+            <span><strong>Tabs in a tab group</strong></span>
+          </label>
+
+          <div class="field">
+            <label for="whitelist">Sites to leave alone</label>
+            <textarea
+              id="whitelist"
+              name="whitelist"
+              rows="5"
+              spellcheck="false"
+              placeholder="mail.google.com&#10;docs.google.com&#10;github.com/my-org"
+            ></textarea>
+            <small
+              >One per line. A domain also covers its subdomains. Add a path to protect only part of a site.</small
+            >
+          </div>
+          <p class="hint muted">
+            To keep a single tab open, use the lock button next to it in the popup<span id="shortcut-hint" hidden
+              >, or press <kbd id="shortcut"></kbd> while you're on the tab</span
+            >.
+            <a href="#" id="change-shortcut">Set keyboard shortcut</a>
+          </p>
+        </section>
+
+        <section class="card">
+          <h2>Time away</h2>
+          <label class="choice">
+            <input type="checkbox" name="pauseWhenAway" />
+            <span
+              ><strong>Pause the clock while I'm away</strong
+              ><small
+                >Tabs don't age while your computer is idle for 5+ minutes, locked or asleep. Without this, coming back
+                after a night away would sweep nearly everything.</small
+              ></span
+            >
+          </label>
+        </section>
+
+        <section class="card">
+          <h2>History</h2>
+          <div class="field">
+            <label for="history-limit">Remember the last</label>
+            <div class="inline">
+              <input id="history-limit" name="historyLimit" type="number" min="0" max="1000" step="1" />
+              <span>closed tabs</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="actions">
+          <button type="button" id="reset" class="btn">Restore defaults</button>
+        </div>
+      </form>
+    </main>
+  </body>
+</html>
