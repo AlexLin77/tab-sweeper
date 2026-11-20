@@ -29,7 +29,7 @@ After you edit the code, click the reload icon on the extension's card.
 - **Sweep idle tabs** runs the rules now, even when auto-sweep is off.
 - **Close duplicates** keeps one copy of each URL, ignoring `#fragments`. It prefers the active, pinned, locked or most recently used copy.
 - **Recently closed**: click a row to reopen and switch to the tab, or use ↺ to reopen it in the background.
-- The **Auto** switch turns auto-sweep on and off. The sliders icon opens the settings.
+- The **Auto** switch turns auto-sweep on and off. The gear icon opens the settings.
 
 ## Keyboard shortcut
 
@@ -47,7 +47,7 @@ Two side effects:
 
 ## Settings
 
-Right-click the toolbar icon → **Options**, or use the sliders icon in the popup. Changes save automatically.
+Right-click the toolbar icon → **Options**, or use the gear icon in the popup. Changes save automatically.
 
 Allow-list entries are domains or domain plus path, one per line:
 
@@ -81,3 +81,63 @@ npm run package     # tab-sweeper.zip for the Chrome Web Store
 ```
 
 The service worker exposes `tabSweeper` for debugging. Open `chrome://extensions` → Tab Sweeper → *service worker*, then try `await tabSweeper.tick()` or `await tabSweeper.handlers.overview()`.
+
+## Credits
+
+The popup's icons come from [Lucide](https://lucide.dev) ([ISC license](https://github.com/lucide-icons/lucide/blob/main/LICENSE)):
+
+- **settings** (gear): unchanged.
+- **x** (close): unchanged. Lucide took it from [Feather](https://feathericons.com) (MIT license).
+- **lock** (keep open): adapted. Lucide took it from Feather (MIT license).
+- **rotate-ccw** (reopen): adapted.
+
+The icon paths are in `src/popup.js`.
+
+<details>
+<summary>License notices</summary>
+
+```
+ISC License
+
+Copyright (c) 2026 Lucide Icons and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
+For the **x** and **lock** icons, which Lucide derived from Feather:
+
+```
+The MIT License (MIT)
+
+Copyright (c) 2013-present Cole Bemis
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+</details>
