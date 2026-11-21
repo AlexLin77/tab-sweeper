@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "See which tabs you actually use, and automatically close or sleep the ones you don't.",
   "minimum_chrome_version": "120",
-  "permissions": ["tabs", "storage", "alarms", "idle", "favicon"],
+  "permissions": ["tabs", "tabGroups", "storage", "alarms", "idle", "favicon"],
   "background": {
     "service_worker": "src/background.js",
     "type": "module"

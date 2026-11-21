@@ -219,6 +219,87 @@ await popupAgain.waitForFunction(() => document.querySelector('.is-active .keep'
 console.log(`  popup tooltip: "${await popupAgain.$eval('.is-active .keep', (n) => n.title)}"`);
 ok('shortcut locks/unlocks the current tab, badge shown and kept across navigation, hints shown');
 
+step('tab groups in the popup');
+await run(() => chrome.storage.sync.set({ protectGrouped: true, idleMinutes: 120, minTabsPerWindow: 3 }));
+for (const name of ['Paper A', 'Paper B', 'Loose tab', 'Draft']) {
+  const p = await browser.newPage();
+  await p.goto(`data:text/html,<title>${name}</title>x`);
+}
+const byTitle = async (title) => (await tabs()).find((t) => t.title === title);
+const thesis = await run(
+  async (ids) => {
+    const id = await chrome.tabs.group({ tabIds: ids });
+    await chrome.tabGroups.update(id, { title: 'Thesis', color: 'blue' });
+    return id;
+  },
+  [(await byTitle('Paper A')).id, (await byTitle('Paper B')).id],
+);
+await run(
+  async (id) => {
+    const g = await chrome.tabs.group({ tabIds: [id] });
+    await chrome.tabGroups.update(g, { color: 'green' });
+  },
+  (await byTitle('Draft')).id,
+);
+assert.ok(thesis >= 0);
+
+const listRows = (page) =>
+  page.$$eval('#list > li', (items) =>
+    items.map((li) => ({
+      header: li.classList.contains('group-header'),
+      inGroup: li.classList.contains('in-group'),
+      title: li.querySelector('.title')?.textContent ?? li.querySelector('.name')?.textContent,
+      chip: li.querySelector('.group-chip')?.textContent ?? null,
+      status: li.querySelector('.status')?.textContent ?? null,
+      text: li.textContent,
+    })),
+  );
+
+for (const scheme of ['light', 'dark']) {
+  const gp = await browser.newPage();
+  gp.on('pageerror', (e) => errors.push(`popup: ${e.message}`));
+  await gp.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: scheme }]);
+  await gp.setViewport({ width: 400, height: 560, deviceScaleFactor: 2 });
+  await gp.goto(`chrome-extension://${extId}/src/popup.html`);
+  await gp.waitForSelector('#list .group-chip');
+  await gp.select('#sort', 'stale');
+
+  // 1. chips on each grouped row, none on ungrouped rows
+  let rows = await listRows(gp);
+  const row = (title) => rows.find((r) => r.title === title);
+  assert.equal(row('Paper A').chip, 'Thesis');
+  assert.equal(row('Paper B').chip, 'Thesis');
+  assert.equal(row('Draft').chip, 'Unnamed group');
+  assert.equal(row('Loose tab').chip, null);
+  // 4. protected-by-group status just says "In group" (the chip already names it)
+  assert.match(row('Paper A').status, /^In group · idle/);
+  assert.match(row('Draft').status, /^In group · idle/);
+  if (scheme === 'light') await gp.screenshot({ path: `${OUT}groups-chips.png` });
+
+  // 2. search matches group names
+  await gp.type('#search', 'thes'); // group name only; no tab title contains it
+  rows = await listRows(gp);
+  assert.deepEqual(rows.map((r) => r.title).sort(), ['Paper A', 'Paper B']);
+  await gp.$eval('#search', (n) => { n.value = ''; n.dispatchEvent(new Event('input')); });
+
+  // 3. tab order view: headers, colored edge, no chips
+  await gp.select('#sort', 'window');
+  rows = await listRows(gp);
+  const headers = rows.filter((r) => r.header);
+  assert.deepEqual(headers.map((r) => r.title), ['Thesis', 'Unnamed group']);
+  assert.match(headers[0].text, /2 tabs/);
+  const iHeader = rows.findIndex((r) => r.header && r.title === 'Thesis');
+  assert.deepEqual(rows.slice(iHeader + 1, iHeader + 3).map((r) => [r.title, r.inGroup]), [['Paper A', true], ['Paper B', true]]);
+  assert.equal(rows[iHeader + 3].title, 'Loose tab');
+  assert.equal(rows[iHeader + 3].inGroup, false);
+  assert.ok(rows.every((r) => r.chip === null), 'no chips in tab-order view');
+  await gp.$eval('#scroller', (n) => (n.scrollTop = n.scrollHeight));
+  await gp.screenshot({ path: `${OUT}groups-tab-order-${scheme}.png` });
+  await gp.select('#sort', 'stale');
+  await gp.close();
+}
+ok('chips, group search, tab-order headers and group status all shown (light and dark)');
+
 await browser.close();
 if (errors.length) {
   console.error('\nErrors:\n' + errors.join('\n'));

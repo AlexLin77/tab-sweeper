@@ -299,10 +299,11 @@ const handlers = {
   async overview() {
     const settings = await getSettings();
     const now = Date.now();
-    const [tabs, windows, local] = await Promise.all([
+    const [tabs, windows, local, groups] = await Promise.all([
       allTabs(),
       chrome.windows.getAll({ windowTypes: ['normal'] }),
       chrome.storage.local.get({ history: [], stats: { closed: 0, discarded: 0 } }),
+      chrome.tabGroups.query({}).catch(() => []),
     ]);
     const { ctx, claimed } = await withState(async (s) => {
       syncTrackedTabs(s, tabs, now, settings);
@@ -319,6 +320,7 @@ const handlers = {
       duplicateCount: findDuplicates(tabs, ctx).length,
       history: local.history,
       stats: local.stats,
+      groups: groups.map(({ id, title, color, collapsed, windowId }) => ({ id, title, color, collapsed, windowId })),
       tabs: tabs.map((tab) => {
         const ev = plan.evaluations.get(tab.id);
         return {
@@ -330,6 +332,7 @@ const handlers = {
           active: tab.active,
           pinned: tab.pinned,
           discarded: tab.discarded,
+          groupId: tab.groupId ?? -1,
           kept: ctx.keptIds.has(tab.id),
           held: plan.held.has(tab.id),
           ...ev,

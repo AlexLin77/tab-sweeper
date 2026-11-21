@@ -13,6 +13,9 @@ const ICONS = {
     '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
 };
 
+// Chrome's tab group colors (chrome.tabGroups.Color). Each maps to a --group-<color> CSS variable.
+const GROUP_COLORS = new Set(['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange']);
+
 const $ = (id) => document.getElementById(id);
 let data = null;
 let view = 'open';
@@ -94,6 +97,28 @@ async function act(type, payload, message) {
 // ---------------------------------------------------------------------------
 // Rendering
 
+// ---------------------------------------------------------------------------
+// Tab groups
+
+const groupName = (group) => group.title?.trim() || 'Unnamed group';
+
+/** Inline style that points --group at the group's color (validated against Chrome's palette). */
+const groupStyle = (group) => `--group: var(--group-${GROUP_COLORS.has(group.color) ? group.color : 'grey'})`;
+
+function groupChip(group) {
+  return el('span', { class: 'group-chip', style: groupStyle(group), title: `Tab group: ${groupName(group)}` }, groupName(group));
+}
+
+function groupHeader(group, tabCount) {
+  return el(
+    'li',
+    { class: 'group-header', style: groupStyle(group), 'aria-label': `Tab group ${groupName(group)}, ${plural(tabCount, 'tab')}` },
+    el('span', { class: 'swatch', 'aria-hidden': 'true' }),
+    el('span', { class: `name${group.title?.trim() ? '' : ' unnamed'}` }, groupName(group)),
+    el('span', { class: 'muted' }, plural(tabCount, 'tab') + (group.collapsed ? ' · collapsed' : '')),
+  );
+}
+
 function statusFor(tab, settings) {
   const idle = formatDuration(tab.idleMs);
   const verb = settings.action === 'discard' ? 'sleeps' : 'closes';
@@ -102,7 +127,7 @@ function statusFor(tab, settings) {
     kept: 'Kept open',
     pinned: 'Pinned',
     audible: 'Playing audio',
-    grouped: 'In a tab group',
+    grouped: 'In group', // the group's name is already shown by its chip or header
     whitelist: 'Allow-listed site',
     discarded: 'Asleep',
     untracked: 'Just opened',
@@ -134,19 +159,30 @@ function matches(query, ...fields) {
   return fields.some((field) => field?.toLowerCase().includes(query));
 }
 
-function openRow(tab) {
+/** `groupedView`: rows sit under a group header, so show a colored edge instead of a chip. */
+function openRow(tab, group, groupedView) {
   const status = statusFor(tab, data.settings);
   const keepLabel = tab.kept ? 'Stop keeping this tab open' : 'Keep this tab open';
   const keepHint = tab.active && shortcut ? `${keepLabel} (${shortcut})` : keepLabel;
+  const inGroupView = groupedView && group;
   return el(
     'li',
-    { class: `row tone-${status.tone}${tab.active ? ' is-active' : ''}` },
+    {
+      class: `row tone-${status.tone}${tab.active ? ' is-active' : ''}${inGroupView ? ' in-group' : ''}`,
+      style: inGroupView ? groupStyle(group) : null,
+    },
     el('img', { class: 'favicon', src: faviconUrl(tab.url), alt: '' }),
     el(
       'button',
       { class: 'row-main', title: tab.url, onclick: () => focusTab(tab) },
       el('span', { class: 'title' }, tab.title || tab.url || 'Untitled'),
-      el('span', { class: 'meta' }, el('span', { class: 'status' }, status.text), el('span', { class: 'host' }, hostOf(tab.url))),
+      el(
+        'span',
+        { class: 'meta' },
+        group && !groupedView ? groupChip(group) : null,
+        el('span', { class: 'status' }, status.text),
+        el('span', { class: 'host' }, hostOf(tab.url)),
+      ),
     ),
     el(
       'button',
@@ -229,8 +265,21 @@ function render() {
   let rows;
   let emptyText;
   if (view === 'open') {
-    const tabs = sortTabs(data.tabs, $('sort').value).filter((t) => matches(query, t.title, t.url));
-    rows = tabs.map(openRow);
+    const groups = new Map((data.groups ?? []).map((g) => [g.id, g]));
+    const groupOf = (tab) => groups.get(tab.groupId) ?? null;
+    const groupedView = $('sort').value === 'window';
+    const tabs = sortTabs(data.tabs, $('sort').value).filter((t) => matches(query, t.title, t.url, groupOf(t)?.title));
+    rows = [];
+    let currentGroupId = -1;
+    for (const tab of tabs) {
+      const group = groupOf(tab);
+      // In tab order a group's tabs are contiguous, so start a header whenever the group changes.
+      if (groupedView && group && tab.groupId !== currentGroupId) {
+        rows.push(groupHeader(group, data.tabs.filter((t) => t.groupId === group.id).length));
+      }
+      currentGroupId = group ? tab.groupId : -1;
+      rows.push(openRow(tab, group, groupedView));
+    }
     emptyText = `No tabs match “${query}”.`;
   } else {
     rows = data.history.filter((e) => matches(query, e.title, e.url)).map(closedRow);

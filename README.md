@@ -24,7 +24,8 @@ After you edit the code, click the reload icon on the extension's card.
 
 ## The popup
 
-- Every open tab, with how long it's been idle and when it will be swept. You can sort by least recent, most recent or tab order, and search titles and URLs (Enter jumps to the first match).
+- Every open tab, with how long it's been idle and when it will be swept. You can sort by least recent, most recent or tab order, and search titles, URLs and tab group names (Enter jumps to the first match).
+- **Tab groups:** a tab in a group shows a chip with the group's name and color. In **Tab order** view, each group's tabs appear under a header in the group's color instead. When tabs in groups are protected from sweeping, their status reads "In group".
 - 🔒 **Keep**: protect one tab from auto-sweep. Unlocking it restarts its clock. A locked tab shows a 🔒 badge on the toolbar icon while it's the current tab. Locks survive restarting Chrome or reloading the extension (see below).
 - **Sweep idle tabs** runs the rules now, even when auto-sweep is off.
 - **Close duplicates** keeps one copy of each URL, ignoring `#fragments`. It prefers the active, pinned, locked or most recently used copy.

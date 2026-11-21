@@ -361,3 +361,101 @@ main {
   white-space: nowrap;
   box-shadow: 0 4px 14px rgb(0 0 0 / 0.2);
 }
+
+/* Tab groups. Colors approximate Chrome's own tab-group palette in each theme. */
+:root {
+  --group-grey: #5f6368;
+  --group-blue: #1a73e8;
+  --group-red: #d93025;
+  --group-yellow: #f9ab00;
+  --group-green: #1e8e3e;
+  --group-pink: #d01884;
+  --group-purple: #a142f4;
+  --group-cyan: #007b83;
+  --group-orange: #fa903e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --group-grey: #dadce0;
+    --group-blue: #8ab4f8;
+    --group-red: #f28b82;
+    --group-yellow: #fdd663;
+    --group-green: #81c995;
+    --group-pink: #ff8bcb;
+    --group-purple: #d7aefb;
+    --group-cyan: #78d9ec;
+    --group-orange: #fcad70;
+  }
+}
+
+.group-chip {
+  flex: none;
+  max-width: 120px;
+  overflow: hidden;
+  padding: 0 7px 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--group) 16%, transparent);
+  color: var(--text);
+  font-weight: 550;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.group-chip::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: var(--group);
+  vertical-align: 1px;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 8px 0 2px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.group-header:first-child {
+  margin-top: 2px;
+}
+
+.group-header .swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--group);
+}
+
+.group-header .name {
+  overflow: hidden;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.group-header .name.unnamed {
+  color: var(--muted);
+  font-style: italic;
+  font-weight: 550;
+}
+
+.group-header .muted {
+  flex: none;
+  font-size: 11.5px;
+}
+
+/* Rows inside a group (tab-order view) get a colored edge, like Chrome's tab strip underline. */
+.row.in-group {
+  margin-left: 6px;
+  border-radius: 0 7px 7px 0;
+  box-shadow: inset 2px 0 0 var(--group);
+}
